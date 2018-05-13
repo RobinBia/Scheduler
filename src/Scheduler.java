@@ -1,18 +1,22 @@
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 
 public class Scheduler
 {
     private Schedule sched;
+    private boolean printReadFrom;
 
-    public Scheduler(String s)
+    public Scheduler(String sched_string)
     {
-        sched = new Schedule(s);
+        printReadFrom = true;
+        sched = new Schedule(sched_string);
+        System.out.println(isVSR(sched));
+
         //prettyPrint(sched.getOPs());
         //prettyPrintTransaction(sched);
         //prettyPrintSerialSchedules(sched);
-
     }
 
 
@@ -80,13 +84,18 @@ public class Scheduler
         ArrayList<Transaction> trans_list = getTransactions(sched);
         int num = getNumberOfTransactions(sched);
         List<Integer> l = new ArrayList<>();
-        List<List<Integer>> perm = new ArrayList<>();
+        List<List<Integer>> perm;
+
+        /*Erzeugt für eine gegebene Integer-Liste (alle Zahlen von 1 bis Anzahl Transaktionen)
+        * alle Permutationen
+        */
         for(int i = 1;i<=num;i++)
         {
             l.add(i);
         }
         perm = listPermutations(l);
 
+        //Erstelle anhand dieser Permutationen die Liste mit allen seriellen Schedules
         for(List<Integer> p:perm)
         {
             Schedule sched_serial = new Schedule();
@@ -143,12 +152,100 @@ public class Scheduler
         return num;
     }
 
-    public boolean isVSR(String[] s)
+    /**
+     * Berechnet, ob ein Schedule sichtserialisierbar ist
+     * @param sched der betrachtete Schedule
+     * @return true => ist sichtserialisierbar, false => ist nicht sichtserialisierbar
+     */
+    public boolean isVSR(Schedule sched)
     {
-
+        for(Schedule sched_serial : getSerialSchedules(sched))
+        {
+            if(isVEQ(sched,sched_serial))
+            {
+                return true;
+            }
+        }
         return false;
     }
 
+    /**
+     * Berechnet, ob s1 sichtäquivalent s2 ist.
+     * @param s1 Schedule 1
+     * @param s2 Schedule 2 (i.d.r. ein serieller Schedule von s1)
+     * @return true => sichtäquivalent, false => nicht sichtäquivalent
+     */
+    public boolean isVEQ(Schedule s1, Schedule s2)
+    {
+        if(readFrom(s1).equals(readFrom(s2)))
+            return true;
+        else
+            return false;
+    }
+
+    /**
+     * Gibt die Liest-von-Relationen eines Schedules als Hashset aus.
+     * @param sched der betrachtete Schedule
+     * @return Hashset mit den Liest-von-Relationen
+     */
+    public HashSet readFrom(Schedule sched)
+    {
+        HashSet<String> rf = new HashSet();
+        HashSet<String> objs = sched.getOperationObjects();
+        ArrayList<Operation> ops_virtual = new ArrayList<Operation>();
+
+        for(String obj:objs)
+        {
+            ops_virtual.add(new Operation("w","",0,obj));
+        }
+        ops_virtual.addAll(sched.getOPs());
+        for(String obj:objs)
+        {
+            ops_virtual.add(new Operation("r","",Integer.MAX_VALUE,obj));
+        }
+        //Nun sind die Operationen durch T_0 und T_infinity ergänzt
+
+        for(int i = 0;i<ops_virtual.size();i++)
+        {
+            if(ops_virtual.get(i).getRead_Write().equals("r"))
+            {
+                Operation last_write_op =  getLastWrite(ops_virtual,i);
+                rf.add("(T"+last_write_op.getTransaction_Number()
+                        +","+last_write_op.getObj()+",T"+ops_virtual.get(i).getTransaction_Number()+")");
+            }
+        }
+
+        if(printReadFrom == true)
+        {
+            for (String sr : rf)
+            {
+                System.out.println(sr);
+            }
+        }
+
+        return rf;
+    }
+
+    /**
+     * Gibt aus einer Liste von Operationen das letzte Schreiben eines Elementes bis zu einem bestimmten Index zurück
+     * @param ops die Operationsliste
+     * @param i der Index, bis zu dem nach Schreiboperationen gesucht wird
+     * @return die gesuchte Operation
+     */
+    public Operation getLastWrite(ArrayList<Operation> ops, int i)
+    {
+        String obj = ops.get(i).getObj();
+        for(int j = i-1; j>=0;j=j-1)
+        {
+            if (ops.get(j).getRead_Write().equals("w")
+                    && ops.get(j).getObj().equals(obj)
+                    && (ops.get(j).getTransaction_Number() != ops.get(i).getTransaction_Number()))
+            {
+                return ops.get(j);
+            }
+        }
+        return null;
+    }
 
     public  List<List<Integer>> listPermutations(List<Integer> list)
     {
@@ -179,6 +276,6 @@ public class Scheduler
 
     public static void main(String args[])
     {
-        Scheduler scheduler = new Scheduler("r1(x)r3(y)r2(x)w1(x)r2(y)c1a2c3");
+        Scheduler scheduler = new Scheduler("r1(x)w3(y)r2(x)w1(x)r2(y)r3(x)c1a2c3");
     }
 }

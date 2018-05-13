@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -94,6 +95,17 @@ public class Schedule
         Matcher m = p.matcher(s);
         m.find();
         return m.group(2);
+    }
+
+    public HashSet<String> getOperationObjects()
+    {
+        HashSet<String> obj = new HashSet<String>();
+        for(Operation op : op_list)
+        {
+            if(!op.getObj().equals(""))
+                obj.add(op.getObj());
+        }
+        return obj;
     }
 
     public ArrayList<Operation> getOPs()
