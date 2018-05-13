@@ -1,60 +1,28 @@
-import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Scheduler
 {
-    public String schedule;
+    private Schedule sched;
 
     public Scheduler(String s)
     {
-        schedule = s;
+        sched = new Schedule(s);
+        //prettyPrint(sched.getOPs());
+        //prettyPrintTransaction(sched);
+        //prettyPrintSerialSchedules(sched);
+
     }
 
-    public String[] getSerialSchedules(String[] s)
-    {
-        return null;
-    }
-
-    public int getNumberOfTransactions(String[] s)
-    {
-        return 1;
-    }
-
-    /**
-     * Gibt die Transaktionsnummer einer Operation zurück
-     * @param s Die Operation als String z.B. r1(x)
-     * @return Nummer der Transaktion (hier 1)
-     */
-    public int getTransactionNumber(String s)
-    {
-        Pattern p = Pattern.compile("([0-9]+)");
-        Matcher m = p.matcher(s);
-        m.find();
-        return Integer.parseInt(m.group(0));
-    }
-
-    /**
-     * Gibt das Datum der Transaktion zurück
-     * @param s Die Operation als String z.B. r1(x)
-     * @return Das Datum x
-     */
-    public String getTransactionObject(String s)
-    {
-        Pattern p = Pattern.compile("(\\()([a-z])(\\))");
-        Matcher m = p.matcher(s);
-        m.find();
-        return m.group(2);
-    }
 
     /**
      * Gibt einen Schedule lesbar aus
-     * @param sched ein Schedule
+     * @param ops Eine Liste von Operationen
      */
-    public void pretty_print(Schedule sched)
+    public void prettyPrint(ArrayList<Operation> ops)
     {
-        for(Operation op : sched.getOPs())
+        for(Operation op : ops)
         {
             if(op.getCommit_Abort().equals(""))
             {
@@ -73,50 +41,107 @@ public class Scheduler
         }
     }
 
-    public Schedule parse(String s)
+    /**
+     * Gibt die Transaktionen eines Schedules sched leserlich aus.
+     * @param sched Der betrachtete Schedule
+     */
+    public void prettyPrintTransaction(Schedule sched)
     {
-        String ns = "";
-        ns = s.replaceAll("\\)r", "\\).r");
-        ns = ns.replaceAll("\\)w", "\\).w");
-        ns = ns.replaceAll("\\)a", "\\).a");
-        ns = ns.replaceAll("\\)c", "\\).c");
-        ns = ns.replaceAll("(\\d+)a", "$1.a");
-        ns = ns.replaceAll("(\\d+)c", "$1.c");
-        ns = ns.replaceAll("(\\d+)w", "$1.w");
-        ns = ns.replaceAll("(\\d+)r", "$1.r");
-        String[] splitted = ns.split("\\.");
-        System.out.println(Arrays.toString(splitted));
-        Schedule sched = new Schedule();
-
-        for(int i=0;i<splitted.length;i++)
+        for(Transaction trans : getTransactions(sched))
         {
-            if(splitted[i].contains("r"))
-            {
-                sched.addOP(new Operation("r","",
-                        getTransactionNumber(splitted[i]),getTransactionObject(splitted[i])));
-            }
-            else if(splitted[i].contains("w"))
-            {
-                sched.addOP(new Operation("w","",
-                        getTransactionNumber(splitted[i]),getTransactionObject(splitted[i])));
-            }
-            else if(splitted[i].contains("c"))
-            {
-                sched.addOP(new Operation("","c",
-                        getTransactionNumber(splitted[i]),""));
-            }
-            else if(splitted[i].contains("a"))
-            {
-                sched.addOP(new Operation("","a",
-                        getTransactionNumber(splitted[i]),""));
-            }
+            System.out.println("\nTransaktion "+trans.getOPs().get(0).getTransaction_Number()+":");
+            prettyPrint(trans.getOPs());
         }
-        pretty_print(sched);
-        return sched;
     }
 
 
+    /**
+     * Gibt alle seriellen Schedules eines Schedules sched leserlich aus.
+     * @param sched Der betrachtete Schedule
+     */
+    public void prettyPrintSerialSchedules(Schedule sched)
+    {
+        for(Schedule ss : getSerialSchedules(sched))
+        {
+            System.out.println("\n");
+            prettyPrint(ss.getOPs());
+            System.out.println("\n");
+        }
+    }
 
+    /**
+     * Gibt alle seriellen Schedules basierend auf dem Schedule sched aus.
+     * @param sched Schedule, dessen seriellen Schedules berechnet werden sollen.
+     * @return ArrayList aller seriellen Schedules.
+     */
+    public ArrayList<Schedule> getSerialSchedules(Schedule sched)
+    {
+        ArrayList<Schedule> sched_list = new ArrayList<Schedule>();
+        ArrayList<Transaction> trans_list = getTransactions(sched);
+        int num = getNumberOfTransactions(sched);
+        List<Integer> l = new ArrayList<>();
+        List<List<Integer>> perm = new ArrayList<>();
+        for(int i = 1;i<=num;i++)
+        {
+            l.add(i);
+        }
+        perm = listPermutations(l);
+
+        for(List<Integer> p:perm)
+        {
+            Schedule sched_serial = new Schedule();
+            for(int i:p)
+            {
+                sched_serial.appendOPs(trans_list.get(i-1).getOPs());
+            }
+            sched_list.add(sched_serial);
+        }
+        return sched_list;
+    }
+
+    /**
+     * Gibt eine ArrayList mit Transaktionen in aufsteigender Reihenfolge zurück, die in Schedule sched vorkommen
+     * @param sched Der betrachtete Schedule
+     * @return Die Transaktionsliste
+     */
+    public ArrayList<Transaction> getTransactions(Schedule sched)
+    {
+        int num = getNumberOfTransactions(sched);
+        System.out.println("Anzahl Transaktionen "+num);
+        ArrayList<Transaction> trans = new ArrayList<Transaction>();
+
+        for(int i = 1;i<=num;i++)
+        {
+            Transaction t = new Transaction();
+            for(Operation op : sched.getOPs())
+            {
+                if(op.getTransaction_Number() == i)
+                {
+                    t.addOp(op);
+                }
+            }
+            trans.add(t);
+        }
+
+        return trans;
+    }
+
+
+    /**
+     * Ermittelt die Anzahl der Transaktionen in dem gegebenen Schedule
+     * @param sched Betrachteter Schedule
+     * @return Anzahl der Transaktionen
+     */
+    public int getNumberOfTransactions(Schedule sched)
+    {
+        int num = 0;
+        for(Operation op : sched.getOPs())
+        {
+            if (op.getTransaction_Number() > num)
+                num = op.getTransaction_Number();
+        }
+        return num;
+    }
 
     public boolean isVSR(String[] s)
     {
@@ -124,9 +149,36 @@ public class Scheduler
         return false;
     }
 
+
+    public  List<List<Integer>> listPermutations(List<Integer> list)
+    {
+
+        if (list.size() == 0) {
+            List<List<Integer>> result = new ArrayList<List<Integer>>();
+            result.add(new ArrayList<Integer>());
+            return result;
+        }
+
+        List<List<Integer>> returnMe = new ArrayList<List<Integer>>();
+
+        Integer firstElement = list.remove(0);
+
+        List<List<Integer>> recursiveReturn = listPermutations(list);
+        for (List<Integer> li : recursiveReturn) {
+
+            for (int index = 0; index <= li.size(); index++) {
+                List<Integer> temp = new ArrayList<Integer>(li);
+                temp.add(index, firstElement);
+                returnMe.add(temp);
+            }
+
+        }
+        return returnMe;
+    }
+
+
     public static void main(String args[])
     {
-        Scheduler scheduler = new Scheduler("r1(x)r2(x)w1(x)r2(y)c1a2");
-        scheduler.parse("r1(x)r2(x)w1(x)r2(y)c1a2");
+        Scheduler scheduler = new Scheduler("r1(x)r3(y)r2(x)w1(x)r2(y)c1a2c3");
     }
 }
