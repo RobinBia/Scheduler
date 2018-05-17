@@ -28,7 +28,7 @@ public class Operation
         return transaction_number;
     }
 
-    public String getObj()
+    public String getObject()
     {
         return obj;
     }

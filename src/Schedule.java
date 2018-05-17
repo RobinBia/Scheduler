@@ -102,8 +102,8 @@ public class Schedule
         HashSet<String> obj = new HashSet<String>();
         for(Operation op : op_list)
         {
-            if(!op.getObj().equals(""))
-                obj.add(op.getObj());
+            if(!op.getObject().equals(""))
+                obj.add(op.getObject());
         }
         return obj;
     }
