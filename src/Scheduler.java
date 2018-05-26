@@ -7,27 +7,35 @@ import java.util.*;
 
 public class Scheduler
 {
+    private String resultString;
     private Schedule sched;
-    private boolean printReadFrom;
     private boolean printHerbrandSemantics;
     private boolean printTransactionCount;
+    private boolean printReadFrom;
+
 
     public Scheduler(String sched_string)
     {
-        printTransactionCount = true;
-        printReadFrom = true;
-        printHerbrandSemantics = true;
+        resultString = "";
+        printHerbrandSemantics = false;
+        printTransactionCount = false;
+        printReadFrom = false;
 
         sched = new Schedule(sched_string);
+        sched = filterAbort(sched); //Alle abgebrochenen Transaktionen löschen
+    }
 
-        System.out.println(isCSR(sched));
-        //System.out.println(isFSR(sched));
-        //System.out.println(isVSR(sched));
+    public Schedule getSchedule()
+    {
+        return sched;
+    }
 
-        //prettyPrint(filterAbort(sched.getOPs()));
-        //prettyPrint(sched.getOPs());
-        //prettyPrintTransaction(sched);
-        //prettyPrintSerialSchedules(sched);
+    public String check()
+    {
+        isFSR(sched);
+        isVSR(sched);
+        isCSR(sched);
+        return resultString;
     }
 
     /**
@@ -39,11 +47,15 @@ public class Scheduler
     {
         for(Schedule sched_serial : getSerialSchedules(sched))
         {
+            //System.out.println(prettyPrint(sched_serial.getOps()));
             if(isFSEQ(sched,sched_serial))
             {
+                resultString += "Der Schedule ist Final-State-Äquivalent mit "+prettyPrint(sched_serial.getOps());
+                resultString += " und somit Final-State-Serialisierbar.\n\n";
                 return true;
             }
         }
+        resultString += "Der Schedule ist nicht Final-State-Serialisierbar\n\n";
         return false;
     }
 
@@ -55,27 +67,18 @@ public class Scheduler
      */
     public boolean isFSEQ(Schedule s1, Schedule s2)
     {
-
-        if(printReadFrom)
+        if (getScheduleHerbrandSemantics(s1).equals(getScheduleHerbrandSemantics(s2)))
         {
-            System.out.println("Berechne Herbrand Semantiken der zu vergleichenden Schedules: ");
-            if (getScheduleHerbrandSemantics(s1).equals(getScheduleHerbrandSemantics(s2)))
-            {
-                System.out.println("Die Herbrand-Semantiken der Schedules sind gleich.\n");
-                return true;
-            }
-            else
-            {
-                System.out.println("Die Herbrand-Semantiken unterscheiden sich.\n");
-                return false;
-            }
+            resultString += "Es wurde ein Final-State-Äquivalenter serieller Schedule gefunden!\n";
+            resultString += "Herbrand-Semantiken von Eingabeschedule:\n";
+            resultString += getScheduleHerbrandSemantics(s1)+"\n";
+            resultString += "Herbrand-Semantiken von seriellem Schedule:\n";
+            resultString += getScheduleHerbrandSemantics(s2)+"\n";
+            return true;
         }
         else
         {
-            if (getScheduleHerbrandSemantics(s1).equals(getScheduleHerbrandSemantics(s2)))
-                return true;
-            else
-                return false;
+            return false;
         }
     }
 
@@ -88,7 +91,7 @@ public class Scheduler
     {
         ArrayList<String> schedSemantics = new ArrayList<>();
         ArrayList<Operation> ops = createT0(sched.getOperationObjects());
-        ops.addAll(sched.getOPs());
+        ops.addAll(sched.getOps());
         ArrayList<String> opSemantics = getOperationHerbrandSemantics(sched);
         //Element an Index i von ops bezieht sich auf Semantik i von opSemantics!
 
@@ -126,13 +129,13 @@ public class Scheduler
         HashSet<String> objs = sched.getOperationObjects();
         //Nun wird die Operationsliste erstellt und die Initialisierungstransaktion hinzugefügt
         ArrayList<Operation> ops = createT0(objs);
-        ops.addAll(sched.getOPs());
+        ops.addAll(sched.getOps());
 
 
         for(int k = 0;k<ops.size();k++)
         {
-            int trans_num = ops.get(k).getTransaction_Number();
-            int op_num = ops.get(k).getTransaction_Number();
+            int trans_num = ops.get(k).getTransactionNumber();
+            int op_num = ops.get(k).getTransactionNumber();
             String op_obj = ops.get(k).getObject();
 
             //Hs(r_i(x)) := Hs(w_j(x)), j != i
@@ -142,7 +145,7 @@ public class Scheduler
                 for(int l =k;l>=0;l = l-1)
                 {
                     if(ops.get(l).getRead_Write().equals("w")
-                            && ops.get(l).getTransaction_Number() != trans_num
+                            && ops.get(l).getTransactionNumber() != trans_num
                             && op_obj.equals(ops.get(l).getObject()))
                     {
                         herbString = herbsem.get(l);
@@ -161,7 +164,7 @@ public class Scheduler
                 for(int l = 0;l<k;l++)
                 {
                     if(ops.get(l).getRead_Write().equals("r")
-                            && trans_num == ops.get(l).getTransaction_Number())
+                            && trans_num == ops.get(l).getTransactionNumber())
                     {
                         if(inif)
                         {
@@ -186,7 +189,7 @@ public class Scheduler
             if(printHerbrandSemantics)
             {
                 if(!ops.get(k).getRead_Write().equals(""))
-                System.out.println("Hs("+ops.get(k).getRead_Write()+""+ops.get(k).getTransaction_Number()
+                System.out.println("Hs("+ops.get(k).getRead_Write()+""+ops.get(k).getTransactionNumber()
                                             +"("+ops.get(k).getObject()+"))="+herbsem.get(k));
             }
         }
@@ -205,56 +208,33 @@ public class Scheduler
     }
 
     /**
-     * Gibt einen Schedule lesbar aus
+     * Erzeugt aus einer Operationsliste einen lesbaren Schedule-String
      * @param ops Eine Liste von Operationen
+     * @return die Stringrepräsentation des Schedules
      */
-    public void prettyPrint(ArrayList<Operation> ops)
+    public String prettyPrint(ArrayList<Operation> ops)
     {
+        String print = "";
         for(Operation op : ops)
         {
             if(op.getCommit_Abort().equals(""))
             {
                 if(op.getRead_Write().equals("r"))
-                    System.out.println("Lesen von "+ op.getObject()+" in Transaktion "+op.getTransaction_Number());
+                    print += "r"+op.getTransactionNumber()+"("+op.getObject()+")";
                 else
-                    System.out.println("Schreiben von "+ op.getObject()+" in Transaktion "+op.getTransaction_Number());
+                    print += "w"+op.getTransactionNumber()+"("+op.getObject()+")";
             }
             else if(op.getRead_Write().equals(""))
             {
                 if(op.getCommit_Abort().equals("a"))
-                    System.out.println("Abbruch von Transaktion "+ op.getTransaction_Number());
+                    print += "a"+op.getTransactionNumber();
                 else
-                    System.out.println("Commit von Transaktion "+ op.getTransaction_Number());
+                    print += "c"+op.getTransactionNumber();
             }
         }
+        return print;
     }
 
-    /**
-     * Gibt die Transaktionen eines Schedules sched leserlich aus.
-     * @param sched Der betrachtete Schedule
-     */
-    public void prettyPrintTransaction(Schedule sched)
-    {
-        for(Transaction trans : getTransactions(sched.getOPs()))
-        {
-            System.out.println("\nTransaktion "+trans.getOPs().get(0).getTransaction_Number()+":");
-            prettyPrint(trans.getOPs());
-        }
-    }
-
-    /**
-     * Gibt alle seriellen Schedules eines Schedules sched leserlich aus.
-     * @param sched Der betrachtete Schedule
-     */
-    public void prettyPrintSerialSchedules(Schedule sched)
-    {
-        for(Schedule ss : getSerialSchedules(sched))
-        {
-            System.out.println("\n");
-            prettyPrint(ss.getOPs());
-            System.out.println("\n");
-        }
-    }
 
     /**
      * Gibt alle seriellen Schedules basierend auf dem Schedule sched aus.
@@ -264,15 +244,12 @@ public class Scheduler
     public ArrayList<Schedule> getSerialSchedules(Schedule sched)
     {
         ArrayList<Schedule> sched_list = new ArrayList<Schedule>();
-        ArrayList<Transaction> trans_list = getTransactions(sched.getOPs());
-        int num = getTransactionNumbers(sched.getOPs()).size();
+        HashMap<Integer,Transaction> trans_map = getTransactions(sched.getOps());
         List<Integer> l = new ArrayList<>();
         List<List<Integer>> perm;
 
-        /*Erzeugt für eine gegebene Integer-Liste (alle Zahlen von 1 bis Anzahl Transaktionen)
-        * alle Permutationen
-        */
-        for(int i = 1;i<=num;i++)
+        //Erzeugt für alle Transaktionsnummern alle Permutationen
+        for(int i:getTransactionNumbers(sched.getOps()))
         {
             l.add(i);
         }
@@ -284,7 +261,7 @@ public class Scheduler
             Schedule sched_serial = new Schedule();
             for(int i:p)
             {
-                sched_serial.appendOPs(trans_list.get(i-1).getOPs());
+                sched_serial.appendOPs(trans_map.get(i).getOPs());
             }
             sched_list.add(sched_serial);
         }
@@ -296,28 +273,27 @@ public class Scheduler
      * @param ops die betrachtete Operationsliste
      * @return Die Transaktionsliste
      */
-    public ArrayList<Transaction> getTransactions(ArrayList<Operation> ops)
+    public HashMap<Integer, Transaction> getTransactions(ArrayList<Operation> ops)
     {
 
         if(printTransactionCount)
         {
             System.out.println("Anzahl Transaktionen: " +getTransactionNumbers(ops).size()+"\n");
         }
-        ArrayList<Transaction> trans = new ArrayList<Transaction>();
+        HashMap<Integer,Transaction> trans = new HashMap<>();
 
         for(Integer tn: getTransactionNumbers(ops))
         {
             Transaction t = new Transaction();
             for(Operation op : ops)
             {
-                if(op.getTransaction_Number() == tn)
+                if(op.getTransactionNumber() == tn)
                 {
                     t.addOp(op);
                 }
             }
-            trans.add(t);
+            trans.put(tn,t);
         }
-
         return trans;
     }
 
@@ -332,7 +308,7 @@ public class Scheduler
         HashSet<Integer> transnums = new HashSet<>();
         for(Operation op : ops)
         {
-            transnums.add(op.getTransaction_Number());
+            transnums.add(op.getTransactionNumber());
         }
         return transnums;
     }
@@ -346,11 +322,15 @@ public class Scheduler
     {
         for(Schedule sched_serial : getSerialSchedules(sched))
         {
+            //System.out.println(prettyPrint(sched_serial.getOps()));
             if(isVEQ(sched,sched_serial))
             {
+                resultString += "Der Schedule ist View-Äquivalent mit "+prettyPrint(sched_serial.getOps());
+                resultString += " und somit View-Serialisierbar.\n\n";
                 return true;
             }
         }
+        resultString += "Der Schedule ist nicht View-Serialisierbar\n\n";
         return false;
     }
 
@@ -362,26 +342,16 @@ public class Scheduler
      */
     public boolean isVEQ(Schedule s1, Schedule s2)
     {
-        if(printReadFrom)
+        if (readFrom(s1).equals(readFrom(s2)))
         {
-            System.out.println("Vergleiche Schedules:");
-            if (readFrom(s1).equals(readFrom(s2)))
-            {
-                System.out.println("Die RF-Mengen sind gleich.\n");
-                return true;
-            }
-            else
-            {
-                System.out.println("Die RF-Mengen unterscheiden sich.\n");
-                return false;
-            }
+            resultString += "Es wurde ein View-Äquivalenter serieller Schedule gefunden!\n";
+            resultString += "RF-Menge von Eingabeschedule:\n"+readFrom(s1)+"\n";
+            resultString += "RF-Menge von seriellem Schedule:\n"+readFrom(s2)+"\n";
+            return true;
         }
         else
         {
-            if (readFrom(s1).equals(readFrom(s2)))
-                return true;
-            else
-                return false;
+            return false;
         }
     }
 
@@ -400,7 +370,7 @@ public class Scheduler
         {
             ops_virtual.add(new Operation("w","",0,obj));
         }
-        ops_virtual.addAll(sched.getOPs());
+        ops_virtual.addAll(sched.getOps());
         for(String obj:objs)
         {
             ops_virtual.add(new Operation("r","",Integer.MAX_VALUE,obj));
@@ -412,8 +382,8 @@ public class Scheduler
             if(ops_virtual.get(i).getRead_Write().equals("r"))
             {
                 Operation last_write_op =  getLastWrite(ops_virtual,i);
-                rf.add("(T"+last_write_op.getTransaction_Number()
-                        +","+last_write_op.getObject()+",T"+ops_virtual.get(i).getTransaction_Number()+")");
+                rf.add("(T"+last_write_op.getTransactionNumber()
+                        +","+last_write_op.getObject()+",T"+ops_virtual.get(i).getTransactionNumber()+")");
             }
         }
 
@@ -446,7 +416,7 @@ public class Scheduler
         {
             if (ops.get(j).getRead_Write().equals("w")
                     && ops.get(j).getObject().equals(obj)
-                    && (ops.get(j).getTransaction_Number() != ops.get(i).getTransaction_Number()))
+                    && (ops.get(j).getTransactionNumber() != ops.get(i).getTransactionNumber()))
             {
                 return ops.get(j);
             }
@@ -481,30 +451,31 @@ public class Scheduler
     }
 
     /**
-     * Gibt die Operationsliste eines Schedules ohne Operationen einer abgebrochenen Transaktion zurück
-     * @param ops betrachtete Operationsliste
-     * @return Liste mit allen Operationsschritten zu Transaktionen, die nicht abgebrochen wurden
+     * Gibt einen Schedule ohne Operationen einer abgebrochenen Transaktion zurück
+     * @param sched betrachteter Schedule
+     * @return neuer Schedule mit allen Operationsschritten zu Transaktionen, die nicht abgebrochen wurden
      */
-    public ArrayList<Operation> filterAbort(ArrayList<Operation> ops)
+    public Schedule filterAbort(Schedule sched)
     {
+        ArrayList<Operation> ops = sched.getOps();
         HashSet<Integer> aborted_transactions = new HashSet();
         ArrayList<Operation> new_ops = new ArrayList<>();
         for(Operation op : ops)
         {
             if(op.getCommit_Abort().equals("a"))
             {
-                aborted_transactions.add(op.getTransaction_Number());
+                aborted_transactions.add(op.getTransactionNumber());
             }
         }
         for(Operation op: ops)
         {
-            if(!aborted_transactions.contains(op.getTransaction_Number()))
+            if(!aborted_transactions.contains(op.getTransactionNumber()))
             {
                 new_ops.add(op);
             }
         }
-        return new_ops;
-
+        sched.setOps(new_ops);
+        return sched;
     }
 
     /**
@@ -514,7 +485,21 @@ public class Scheduler
      */
     public boolean isCSR(Schedule sched)
     {
-        ArrayList<Operation> ops = filterAbort(sched.getOPs()); //Nur nicht abgebrochene Transaktionen betrachten
+        Graph g = getConflictGraph(sched);
+        if(hasNoCycle(g))
+        {
+            resultString += "Der Konfliktgraph hat keine Zyklen. Die Eingabe ist somit Konflikt-Serialisierbar\n\n";
+        }
+        else
+        {
+            resultString += "Der Konfliktgraph hat Zyklen. Die Eingabe ist somit nicht Konflikt-Serialisierbar\n\n";
+        }
+        return hasNoCycle(g); //Hat der erzeugte Graph einen Zyklus?
+    }
+
+    public Graph<Integer,String> getConflictGraph(Schedule sched)
+    {
+        ArrayList<Operation> ops = sched.getOps();
         Graph<Integer, String> g = new SparseMultigraph<>();
         HashSet<Integer> transnums = getTransactionNumbers(ops);
 
@@ -529,14 +514,14 @@ public class Scheduler
             {
                 Operation iop = ops.get(i);
                 Operation jop = ops.get(j);
-                int itn = iop.getTransaction_Number();
-                int jtn = jop.getTransaction_Number();
+                int itn = iop.getTransactionNumber();
+                int jtn = jop.getTransactionNumber();
 
                 //Folgendes if ist der Filter für die Konfliktrelation
                 if(iop.getCommit_Abort().equals("") && jop.getCommit_Abort().equals("") //kein commit oder abort
-                    && itn != jtn //unterschiedliche Transaktion
-                    && iop.getObject().equals(jop.getObject()) //Gleiches Objekt
-                    && (iop.getRead_Write().equals("w") || jop.getRead_Write().equals("w"))) //min eine Transaktion schreibt
+                        && itn != jtn //unterschiedliche Transaktion
+                        && iop.getObject().equals(jop.getObject()) //Gleiches Objekt
+                        && (iop.getRead_Write().equals("w") || jop.getRead_Write().equals("w"))) //min eine Transaktion schreibt
                 {
                     //Konflikt gefunden!
                     if(!getNumericEdges(g).contains(new Pair(itn,jtn))) //Schauen, ob Kante schon im Graphen vorhanden
@@ -547,8 +532,7 @@ public class Scheduler
                 }
             }
         }
-        new GUI(g);
-        return hasNoCycle(g); //Hat der erzeugte Graph einen Zyklus?
+        return g;
     }
 
     /**
@@ -606,13 +590,12 @@ public class Scheduler
 
     public static void main(String args[])
     {
-        String ex1 = "r1(x)r2(y)w1(y)r3(z)w3(z)r2(x)w2(z)w1(x)";
+        String ex1 = "r1(x)r2(y)w1(y)r3(z)w3(z)r2(x)w2(z)w1(x)c1c2c3";
         String ex2 = "r1(x)w3(y)r2(x)w1(x)r2(y)r3(x)c1a2c3";
         String ex3 = "r1(x)r2(y)w2(x)w1(y)c2c1";
         String ex4 = "r2(y)w2(y)r2(x)r1(y)r1(x)w1(x)w1(z)r3(z)r3(x)w3(z)c1c2c3";//Blatt3 Aufgabe 3(a)
         String ex5 = "r1(x)r2(z)w3(y)r1(y)r2(x)r3(y)w1(x)w2(z)r3(z)w1(z)w3(x)c1c2c3";//Blatt3 Aufgabe 3(b)
         String ex6 = "r2(z)r1(x)w2(x)r4(x)r1(y)r4(y)w3(y)r4(z)w4(y)c1c2c3c4";//Blatt3 Aufgabe 3(c)
-        Scheduler scheduler = new Scheduler(ex6);
-        //GUI gui = new GUI();
+        Scheduler scheduler = new Scheduler(ex1);
     }
 }

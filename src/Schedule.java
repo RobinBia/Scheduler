@@ -44,7 +44,7 @@ public class Schedule
         ns = ns.replaceAll("(\\d+)r", "$1.r");
         String[] splitted = ns.split("\\.");
         System.out.println("\n"+Arrays.toString(splitted)+"\n");
-        //Schedule sched = new Schedule();
+
 
         for(int i=0;i<splitted.length;i++)
         {
@@ -108,9 +108,14 @@ public class Schedule
         return obj;
     }
 
-    public ArrayList<Operation> getOPs()
+    public ArrayList<Operation> getOps()
     {
         return op_list;
+    }
+
+    public void setOps(ArrayList<Operation> new_ops)
+    {
+        op_list = new_ops;
     }
 
     public void appendOPs(ArrayList<Operation> ops)

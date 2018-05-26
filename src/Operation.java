@@ -23,7 +23,7 @@ public class Operation
         return read_write;
     }
 
-    public int getTransaction_Number()
+    public int getTransactionNumber()
     {
         return transaction_number;
     }
