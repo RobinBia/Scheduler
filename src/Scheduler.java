@@ -1,6 +1,8 @@
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.SparseMultigraph;
+import edu.uci.ics.jung.graph.util.EdgeType;
+import edu.uci.ics.jung.graph.util.Pair;
+import java.util.*;
 
 
 public class Scheduler
@@ -18,8 +20,9 @@ public class Scheduler
 
         sched = new Schedule(sched_string);
 
-        System.out.println(isFSR(sched));
-        System.out.println(isVSR(sched));
+        System.out.println(isCSR(sched));
+        //System.out.println(isFSR(sched));
+        //System.out.println(isVSR(sched));
 
         //prettyPrint(filterAbort(sched.getOPs()));
         //prettyPrint(sched.getOPs());
@@ -232,13 +235,12 @@ public class Scheduler
      */
     public void prettyPrintTransaction(Schedule sched)
     {
-        for(Transaction trans : getTransactions(sched))
+        for(Transaction trans : getTransactions(sched.getOPs()))
         {
             System.out.println("\nTransaktion "+trans.getOPs().get(0).getTransaction_Number()+":");
             prettyPrint(trans.getOPs());
         }
     }
-
 
     /**
      * Gibt alle seriellen Schedules eines Schedules sched leserlich aus.
@@ -262,8 +264,8 @@ public class Scheduler
     public ArrayList<Schedule> getSerialSchedules(Schedule sched)
     {
         ArrayList<Schedule> sched_list = new ArrayList<Schedule>();
-        ArrayList<Transaction> trans_list = getTransactions(sched);
-        int num = getNumberOfTransactions(sched);
+        ArrayList<Transaction> trans_list = getTransactions(sched.getOPs());
+        int num = getTransactionNumbers(sched.getOPs()).size();
         List<Integer> l = new ArrayList<>();
         List<List<Integer>> perm;
 
@@ -290,25 +292,25 @@ public class Scheduler
     }
 
     /**
-     * Gibt eine ArrayList mit Transaktionen in aufsteigender Reihenfolge zurück, die in Schedule sched vorkommen
-     * @param sched Der betrachtete Schedule
+     * Gibt eine ArrayList mit Transaktionen in aufsteigender Reihenfolge zurück, die in der Operationsliste ops vorkommen.
+     * @param ops die betrachtete Operationsliste
      * @return Die Transaktionsliste
      */
-    public ArrayList<Transaction> getTransactions(Schedule sched)
+    public ArrayList<Transaction> getTransactions(ArrayList<Operation> ops)
     {
-        int num = getNumberOfTransactions(sched);
+
         if(printTransactionCount)
         {
-            System.out.println("Anzahl Transaktionen: " + num+"\n");
+            System.out.println("Anzahl Transaktionen: " +getTransactionNumbers(ops).size()+"\n");
         }
         ArrayList<Transaction> trans = new ArrayList<Transaction>();
 
-        for(int i = 1;i<=num;i++)
+        for(Integer tn: getTransactionNumbers(ops))
         {
             Transaction t = new Transaction();
-            for(Operation op : sched.getOPs())
+            for(Operation op : ops)
             {
-                if(op.getTransaction_Number() == i)
+                if(op.getTransaction_Number() == tn)
                 {
                     t.addOp(op);
                 }
@@ -321,19 +323,18 @@ public class Scheduler
 
 
     /**
-     * Ermittelt die Anzahl der Transaktionen in dem gegebenen Schedule
-     * @param sched Betrachteter Schedule
-     * @return Anzahl der Transaktionen
+     * Gibt die Nummern aller Transaktionen zurück, die sich in der Operationsliste befinden
+     * @param ops Betrachtete Liste
+     * @return HashSet mit den Transaktionsnummern
      */
-    public int getNumberOfTransactions(Schedule sched)
+    public HashSet<Integer> getTransactionNumbers(ArrayList<Operation> ops)
     {
-        int num = 0;
-        for(Operation op : sched.getOPs())
+        HashSet<Integer> transnums = new HashSet<>();
+        for(Operation op : ops)
         {
-            if (op.getTransaction_Number() > num)
-                num = op.getTransaction_Number();
+            transnums.add(op.getTransaction_Number());
         }
-        return num;
+        return transnums;
     }
 
     /**
@@ -506,13 +507,112 @@ public class Scheduler
 
     }
 
+    /**
+     * Berechnet ob ein Schedule konfliktserialisierbar ist.
+     * @param sched Erster betrachteter Schedule
+     * @return true = > Schedule ist konfliktserialisierbar, false => Schedule ist nicht konfliktserialisierbar
+     */
+    public boolean isCSR(Schedule sched)
+    {
+        ArrayList<Operation> ops = filterAbort(sched.getOPs()); //Nur nicht abgebrochene Transaktionen betrachten
+        Graph<Integer, String> g = new SparseMultigraph<>();
+        HashSet<Integer> transnums = getTransactionNumbers(ops);
+
+        for(int i : transnums) //Für jede Transaktion einen Knoten erstellen
+        {
+            g.addVertex(i);
+        }
+
+        for(int i = 0;i<ops.size();i++)
+        {
+            for(int j = i;j<ops.size();j++)
+            {
+                Operation iop = ops.get(i);
+                Operation jop = ops.get(j);
+                int itn = iop.getTransaction_Number();
+                int jtn = jop.getTransaction_Number();
+
+                //Folgendes if ist der Filter für die Konfliktrelation
+                if(iop.getCommit_Abort().equals("") && jop.getCommit_Abort().equals("") //kein commit oder abort
+                    && itn != jtn //unterschiedliche Transaktion
+                    && iop.getObject().equals(jop.getObject()) //Gleiches Objekt
+                    && (iop.getRead_Write().equals("w") || jop.getRead_Write().equals("w"))) //min eine Transaktion schreibt
+                {
+                    //Konflikt gefunden!
+                    if(!getNumericEdges(g).contains(new Pair(itn,jtn))) //Schauen, ob Kante schon im Graphen vorhanden
+                    {
+                        //System.out.println(iop.getRead_Write()+""+itn+","+jop.getRead_Write()+""+jtn);
+                        g.addEdge(itn+"->"+jtn, itn,jtn,EdgeType.DIRECTED);
+                    }
+                }
+            }
+        }
+        new GUI(g);
+        return hasNoCycle(g); //Hat der erzeugte Graph einen Zyklus?
+    }
+
+    /**
+     * Alernative repräsentation für gerichtete Kanten als Liste von Paaren
+     * @param g der betrachtete Graph
+     * @return Die Liste mit den Paaren <a,b>, wobei a->b eine gerichtete Kante von a nach b ist
+     */
+    public ArrayList<Pair> getNumericEdges(Graph<Integer, String> g)
+    {
+        ArrayList<Pair> al = new ArrayList<>();
+        for(String s : g.getEdges())
+        {
+            al.add(g.getEndpoints(s));
+        }
+        return al;
+    }
+
+    /**
+     * Überprüft, ob ein gerichteter Graph keinen Zyklus hat
+     * @param g der betrachtete Graph
+     * @return true => g hat keinen Zyklus, false => g hat einen Zyklus
+     */
+    public boolean hasNoCycle(Graph g)
+    {
+        Collection<Integer> vertices = g.getVertices();
+
+        for(Integer startVertex: vertices)//Führe für jeden Knoten als Startknoten die Tiefensuche aus
+        {
+            //Stacklösung statt rekursive Tiefensuche
+            Stack visited = new Stack();
+            Stack tovisit = new Stack();
+            tovisit.push(startVertex);
+            while (!tovisit.isEmpty())
+            {
+                int currentVertex = (Integer) tovisit.pop();
+                //Visit current node:
+                if (!visited.contains(currentVertex))
+                {
+                    Collection<String> cs = g.getOutEdges(currentVertex);
+                    for (String s : cs)
+                    {
+                        tovisit.push(g.getDest(s));
+                    }
+                    visited.push(currentVertex);
+                    //System.out.println("currentVertex: " + currentVertex);
+                } else
+                {
+                    return false; //Schon mal besucht => Zyklus
+                }
+
+            }
+        }
+        return true;
+    }
+
     public static void main(String args[])
     {
         String ex1 = "r1(x)r2(y)w1(y)r3(z)w3(z)r2(x)w2(z)w1(x)";
         String ex2 = "r1(x)w3(y)r2(x)w1(x)r2(y)r3(x)c1a2c3";
         String ex3 = "r1(x)r2(y)w2(x)w1(y)c2c1";
-        Scheduler scheduler = new Scheduler(ex2);
-
-
+        String ex4 = "r2(y)w2(y)r2(x)r1(y)r1(x)w1(x)w1(z)r3(z)r3(x)w3(z)c1c2c3";//Blatt3 Aufgabe 3(a)
+        String ex5 = "r1(x)r2(z)w3(y)r1(y)r2(x)r3(y)w1(x)w2(z)r3(z)w1(z)w3(x)c1c2c3";//Blatt3 Aufgabe 3(b)
+        String ex6 = "r2(z)r1(x)w2(x)r4(x)r1(y)r4(y)w3(y)r4(z)w4(y)c1c2c3c4";//Blatt3 Aufgabe 3(c)
+        Scheduler scheduler = new Scheduler(ex6);
+        //GUI gui = new GUI();
     }
 }

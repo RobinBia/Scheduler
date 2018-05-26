@@ -14,7 +14,7 @@ public class Schedule
      */
     public Schedule(String s)
     {
-        op_list = new ArrayList<Operation>();
+        op_list = new ArrayList<>();
         parse(s);
     }
 
@@ -51,22 +51,22 @@ public class Schedule
             if(splitted[i].contains("r"))
             {
                 op_list.add(new Operation("r","",
-                        getTransactionNumber(splitted[i]), getOperationObject(splitted[i])));
+                        parseTransactionNumber(splitted[i]), parseOperationObject(splitted[i])));
             }
             else if(splitted[i].contains("w"))
             {
                 op_list.add(new Operation("w","",
-                        getTransactionNumber(splitted[i]), getOperationObject(splitted[i])));
+                        parseTransactionNumber(splitted[i]), parseOperationObject(splitted[i])));
             }
             else if(splitted[i].contains("c"))
             {
                 op_list.add(new Operation("","c",
-                        getTransactionNumber(splitted[i]),""));
+                        parseTransactionNumber(splitted[i]),""));
             }
             else if(splitted[i].contains("a"))
             {
                 op_list.add(new Operation("","a",
-                        getTransactionNumber(splitted[i]),""));
+                        parseTransactionNumber(splitted[i]),""));
             }
         }
     }
@@ -76,7 +76,7 @@ public class Schedule
      * @param s Die Operation als String z.B. r1(x)
      * @return Nummer der Transaktion (hier 1)
      */
-    public int getTransactionNumber(String s)
+    public int parseTransactionNumber(String s)
     {
         Pattern p = Pattern.compile("([0-9]+)");
         Matcher m = p.matcher(s);
@@ -89,7 +89,7 @@ public class Schedule
      * @param s Die Operation als String z.B. r1(x)
      * @return Das Datum x
      */
-    public String getOperationObject(String s)
+    public String parseOperationObject(String s)
     {
         Pattern p = Pattern.compile("(\\()([a-z])(\\))");
         Matcher m = p.matcher(s);
