@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="26581948-37c9-4fde-b655-d1d1107d3951" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/GUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Operation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Operation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Schedule.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Schedule.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Scheduler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Scheduler.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
@@ -18,15 +15,30 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="GUI.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/GUI.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="543">
+              <caret line="130" selection-start-line="130" selection-end-line="130" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="docComment;method#getGraphVisualisation#0;class#GUI#0" />
+                <element signature="method#getGraphVisualisation#0;class#GUI#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="Scheduler.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Scheduler.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3069">
-              <caret line="592" column="69" lean-forward="true" selection-start-line="592" selection-start-column="21" selection-end-line="592" selection-end-column="69" />
+            <state relative-caret-position="891">
+              <caret line="27" column="4" selection-start-line="27" selection-start-column="4" selection-end-line="27" selection-end-column="4" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#867#868#0" expanded="true" />
-                <element signature="e#884#885#0" expanded="true" />
+                <element signature="docComment;method#getSchedule#0;class#Scheduler#0" />
+                <element signature="docComment;method#check#0;class#Scheduler#0" />
+                <element signature="method#check#0;class#Scheduler#0" />
                 <element signature="docComment;method#isFSR#0;class#Scheduler#0" />
                 <element signature="method#isFSR#0;class#Scheduler#0" />
                 <element signature="docComment;method#isFSEQ#0;class#Scheduler#0" />
@@ -67,32 +79,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GUI.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/GUI.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="192">
-              <caret line="44" column="49" selection-start-line="44" selection-start-column="49" selection-end-line="44" selection-end-column="49" />
-              <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="docComment;method#getGraphVisualisation#0;class#GUI#0" />
-                <element signature="method#getGraphVisualisation#0;class#GUI#0" />
-                <element signature="e#1868#1869#0" expanded="true" />
-                <element signature="e#1897#1898#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Container.java" pinned="false" current-in-tab="false">
-        <entry file="jar://C:/Program Files/Java/jdk-10.0.1/lib/src.zip!/java.desktop/java/awt/Container.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="433" selection-start-line="433" selection-end-line="433" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Schedule.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Schedule.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Schedule.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="1650">
@@ -154,8 +141,8 @@
         <option value="$PROJECT_DIR$/src/Transaction.java" />
         <option value="$PROJECT_DIR$/src/Operation.java" />
         <option value="$PROJECT_DIR$/src/Schedule.java" />
-        <option value="$PROJECT_DIR$/src/Scheduler.java" />
         <option value="$PROJECT_DIR$/src/GUI.java" />
+        <option value="$PROJECT_DIR$/src/Scheduler.java" />
       </list>
     </option>
   </component>
@@ -303,7 +290,7 @@
       <window_info anchor="right" id="Capture Analysis" order="3" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
       <window_info anchor="right" id="Maven Projects" order="3" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3255597" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.3255597" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Capture Tool" order="2" />
@@ -338,8 +325,9 @@
           <caret line="1" column="47" selection-start-line="1" selection-start-column="47" selection-end-line="1" selection-end-column="47" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#867#868#0" expanded="true" />
-            <element signature="e#884#885#0" expanded="true" />
+            <element signature="docComment;method#getSchedule#0;class#Scheduler#0" />
+            <element signature="docComment;method#check#0;class#Scheduler#0" />
+            <element signature="method#check#0;class#Scheduler#0" />
             <element signature="docComment;method#isFSR#0;class#Scheduler#0" />
             <element signature="method#isFSR#0;class#Scheduler#0" />
             <element signature="docComment;method#isFSEQ#0;class#Scheduler#0" />
@@ -387,8 +375,6 @@
             <element signature="imports" expanded="true" />
             <element signature="docComment;method#getGraphVisualisation#0;class#GUI#0" />
             <element signature="method#getGraphVisualisation#0;class#GUI#0" />
-            <element signature="e#1868#1869#0" expanded="true" />
-            <element signature="e#1897#1898#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -428,8 +414,9 @@
           <caret line="17" lean-forward="true" selection-start-line="17" selection-end-line="17" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#867#868#0" expanded="true" />
-            <element signature="e#884#885#0" expanded="true" />
+            <element signature="docComment;method#getSchedule#0;class#Scheduler#0" />
+            <element signature="docComment;method#check#0;class#Scheduler#0" />
+            <element signature="method#check#0;class#Scheduler#0" />
             <element signature="docComment;method#isFSR#0;class#Scheduler#0" />
             <element signature="method#isFSR#0;class#Scheduler#0" />
             <element signature="docComment;method#isFSEQ#0;class#Scheduler#0" />
@@ -504,8 +491,9 @@
           <caret line="191" column="4" selection-start-line="191" selection-start-column="4" selection-end-line="191" selection-end-column="4" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#867#868#0" expanded="true" />
-            <element signature="e#884#885#0" expanded="true" />
+            <element signature="docComment;method#getSchedule#0;class#Scheduler#0" />
+            <element signature="docComment;method#check#0;class#Scheduler#0" />
+            <element signature="method#check#0;class#Scheduler#0" />
             <element signature="docComment;method#isFSR#0;class#Scheduler#0" />
             <element signature="method#isFSR#0;class#Scheduler#0" />
             <element signature="docComment;method#isFSEQ#0;class#Scheduler#0" />
@@ -580,8 +568,9 @@
           <caret line="183" column="1" lean-forward="true" selection-start-line="183" selection-start-column="1" selection-end-line="183" selection-end-column="1" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#867#868#0" expanded="true" />
-            <element signature="e#884#885#0" expanded="true" />
+            <element signature="docComment;method#getSchedule#0;class#Scheduler#0" />
+            <element signature="docComment;method#check#0;class#Scheduler#0" />
+            <element signature="method#check#0;class#Scheduler#0" />
             <element signature="docComment;method#isFSR#0;class#Scheduler#0" />
             <element signature="method#isFSR#0;class#Scheduler#0" />
             <element signature="docComment;method#isFSEQ#0;class#Scheduler#0" />
@@ -656,8 +645,9 @@
           <caret line="29" column="45" lean-forward="true" selection-start-line="29" selection-start-column="45" selection-end-line="29" selection-end-column="45" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#867#868#0" expanded="true" />
-            <element signature="e#884#885#0" expanded="true" />
+            <element signature="docComment;method#getSchedule#0;class#Scheduler#0" />
+            <element signature="docComment;method#check#0;class#Scheduler#0" />
+            <element signature="method#check#0;class#Scheduler#0" />
             <element signature="docComment;method#isFSR#0;class#Scheduler#0" />
             <element signature="method#isFSR#0;class#Scheduler#0" />
             <element signature="docComment;method#isFSEQ#0;class#Scheduler#0" />
@@ -725,8 +715,9 @@
           <caret line="4" column="37" selection-start-line="4" selection-start-column="37" selection-end-line="4" selection-end-column="37" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#867#868#0" expanded="true" />
-            <element signature="e#884#885#0" expanded="true" />
+            <element signature="docComment;method#getSchedule#0;class#Scheduler#0" />
+            <element signature="docComment;method#check#0;class#Scheduler#0" />
+            <element signature="method#check#0;class#Scheduler#0" />
             <element signature="docComment;method#isFSR#0;class#Scheduler#0" />
             <element signature="method#isFSR#0;class#Scheduler#0" />
             <element signature="docComment;method#isFSEQ#0;class#Scheduler#0" />
@@ -781,29 +772,34 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Schedule.java">
+    <entry file="jar://C:/Program Files/Java/jdk-10.0.1/lib/src.zip!/java.desktop/java/awt/Container.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1650">
-          <caret line="117" column="26" selection-start-line="117" selection-start-column="26" selection-end-line="117" selection-end-column="26" />
+        <state relative-caret-position="225">
+          <caret line="433" selection-start-line="433" selection-end-line="433" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/GUI.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="543">
+          <caret line="130" selection-start-line="130" selection-end-line="130" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="docComment;method#parse#0;class#Schedule#0" />
-            <element signature="method#parse#0;class#Schedule#0" />
-            <element signature="method#parseTransactionNumber#0;class#Schedule#0" />
-            <element signature="method#parseOperationObject#0;class#Schedule#0" />
-            <element signature="method#getOperationObjects#0;class#Schedule#0" />
+            <element signature="docComment;method#getGraphVisualisation#0;class#GUI#0" />
+            <element signature="method#getGraphVisualisation#0;class#GUI#0" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Scheduler.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3069">
-          <caret line="592" column="69" lean-forward="true" selection-start-line="592" selection-start-column="21" selection-end-line="592" selection-end-column="69" />
+        <state relative-caret-position="891">
+          <caret line="27" column="4" selection-start-line="27" selection-start-column="4" selection-end-line="27" selection-end-column="4" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#867#868#0" expanded="true" />
-            <element signature="e#884#885#0" expanded="true" />
+            <element signature="docComment;method#getSchedule#0;class#Scheduler#0" />
+            <element signature="docComment;method#check#0;class#Scheduler#0" />
+            <element signature="method#check#0;class#Scheduler#0" />
             <element signature="docComment;method#isFSR#0;class#Scheduler#0" />
             <element signature="method#isFSR#0;class#Scheduler#0" />
             <element signature="docComment;method#isFSEQ#0;class#Scheduler#0" />
@@ -843,23 +839,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://C:/Program Files/Java/jdk-10.0.1/lib/src.zip!/java.desktop/java/awt/Container.java">
+    <entry file="file://$PROJECT_DIR$/src/Schedule.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="433" selection-start-line="433" selection-end-line="433" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/GUI.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="192">
-          <caret line="44" column="49" selection-start-line="44" selection-start-column="49" selection-end-line="44" selection-end-column="49" />
+        <state relative-caret-position="1650">
+          <caret line="117" column="26" selection-start-line="117" selection-start-column="26" selection-end-line="117" selection-end-column="26" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="docComment;method#getGraphVisualisation#0;class#GUI#0" />
-            <element signature="method#getGraphVisualisation#0;class#GUI#0" />
-            <element signature="e#1868#1869#0" expanded="true" />
-            <element signature="e#1897#1898#0" expanded="true" />
+            <element signature="docComment;method#parse#0;class#Schedule#0" />
+            <element signature="method#parse#0;class#Schedule#0" />
+            <element signature="method#parseTransactionNumber#0;class#Schedule#0" />
+            <element signature="method#parseOperationObject#0;class#Schedule#0" />
+            <element signature="method#getOperationObjects#0;class#Schedule#0" />
           </folding>
         </state>
       </provider>

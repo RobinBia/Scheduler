@@ -122,6 +122,13 @@ public class GUI implements ActionListener
 
     public static void main(String[] args)
     {
+        String ex1 = "r1(x)r2(y)w1(y)r3(z)w3(z)r2(x)w2(z)w1(x)c1c2c3";
+        String ex2 = "r1(x)w3(y)r2(x)w1(x)r2(y)r3(x)c1a2c3";
+        String ex3 = "r1(x)r2(y)w2(x)w1(y)c2c1";
+        String ex4 = "r2(y)w2(y)r2(x)r1(y)r1(x)w1(x)w1(z)r3(z)r3(x)w3(z)c1c2c3";//Blatt3 Aufgabe 3(a)
+        String ex5 = "r1(x)r2(z)w3(y)r1(y)r2(x)r3(y)w1(x)w2(z)r3(z)w1(z)w3(x)c1c2c3";//Blatt3 Aufgabe 3(b)
+        String ex6 = "r2(z)r1(x)w2(x)r4(x)r1(y)r4(y)w3(y)r4(z)w4(y)c1c2c3c4";//Blatt3 Aufgabe 3(c)
+
         new GUI();
     }
 }
