@@ -22,8 +22,8 @@ public class Scheduler
         printReadFrom = false;
 
         sched = new Schedule(sched_string);
-        sched = filterAbort(sched); //Alle abgebrochenen Transaktionen löschen
     }
+
 
     /**
      * Gibt den Schedule sched zurück, der in Konstruktor initialisiert wurde
@@ -40,9 +40,11 @@ public class Scheduler
      */
     public String check()
     {
-        isFSR(sched);
-        isVSR(sched);
-        isCSR(sched);
+        isFSR(filterAbort(sched));
+        isVSR(filterAbort(sched));
+        isCSR(filterAbort(sched));
+        String plres = (new S2PL(sched)).strict2PL();
+        resultString += plres;
         return resultString;
     }
 
@@ -482,8 +484,9 @@ public class Scheduler
                 new_ops.add(op);
             }
         }
-        sched.setOps(new_ops);
-        return sched;
+        Schedule sched_new = new Schedule();
+        sched_new.setOps(new_ops);
+        return sched_new;
     }
 
     /**
